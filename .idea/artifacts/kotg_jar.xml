@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="kotg:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/kotg_jar</output-path>
+    <root id="archive" name="kotg.jar">
+      <element id="module-output" name="kotg" />
+    </root>
+  </artifact>
+</component>
