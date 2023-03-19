@@ -43,6 +43,8 @@ public class Block implements Serializable {
     }
 
     public String getMerkleRoot() {
+        if (transactions.size() == 0) return "";
+
         List<String> merkleNodes = transactions.stream()
                                                .map(txn -> Hasher.hash(txn.toString()))
                                                .collect(Collectors.toList());
