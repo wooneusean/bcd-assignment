@@ -1,10 +1,11 @@
 package io.gamekeep.components;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class Blockchain {
-    private static LinkedList<Block> blockchain = new LinkedList<>();
+    private static LinkedList<Block> blockchain = new LinkedList<>(Arrays.asList(new Block("0")));
     private static String filePath;
 
     public static Block getCurrentBlock() {
@@ -24,14 +25,7 @@ public class Blockchain {
     }
 
     public static boolean pushTransaction(Transaction txn) {
-        Block currentBlock;
-        try {
-            currentBlock = blockchain.getLast();
-        } catch (Exception e) {
-            currentBlock = new Block("0");
-            blockchain.add(currentBlock);
-        }
-
+        Block currentBlock = blockchain.getLast();
 
         boolean isNewBlockCreated = false;
         if (currentBlock.getTransactions().size() >= Block.MAX_TRANSACTIONS) {

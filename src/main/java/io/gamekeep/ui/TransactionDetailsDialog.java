@@ -11,10 +11,8 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainDocument;
 import java.awt.event.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.UUID;
 
 public class TransactionDetailsDialog extends JDialog {
 
@@ -35,7 +33,7 @@ public class TransactionDetailsDialog extends JDialog {
     private JButton btnVerifySignature;
     private boolean isCancelled = false;
 
-    public TransactionDetailsDialog(Transaction transaction) {
+    public TransactionDetailsDialog(Transaction transaction, boolean isEditing) {
         this.transaction = transaction;
         setContentPane(contentPane);
         setModal(true);
@@ -46,7 +44,7 @@ public class TransactionDetailsDialog extends JDialog {
 
         cmbSigner.setModel(new DefaultComboBoxModel<>(GameKeepConstants.SELLERS.toArray(new Seller[0])));
 
-        if (transaction.getTransactionDate().isBefore(LocalDateTime.now().minusSeconds(1))) {
+        if (!isEditing) {
             isNewTransaction = false;
             setTitle("Transaction - " + transaction.getTransactionId());
             Arrays.stream(new JTextComponent[]{
@@ -73,12 +71,14 @@ public class TransactionDetailsDialog extends JDialog {
         txtAmountPaid.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (txtAmountPaid.getText().equals("0")) txtAmountPaid.setText("");
+                if (txtAmountPaid.getText().equals("0"))
+                    txtAmountPaid.setText("");
             }
 
             @Override
             public void focusLost(FocusEvent e) {
-                if (txtAmountPaid.getText().equals("")) txtAmountPaid.setText("0");
+                if (txtAmountPaid.getText().equals(""))
+                    txtAmountPaid.setText("0");
             }
         });
 
@@ -106,9 +106,9 @@ public class TransactionDetailsDialog extends JDialog {
             String message = "";
             try {
                 if (this.transaction.verifySignature(seller.getKeyPair().getPublic())) {
-                    message = "Transaction successfully verified.\n\nThe data has not been tampered with.";
+                    message = "Transaction verification success.\n\nThe data has not been tampered with.";
                 } else {
-                    message = "Transaction failed verification.\n\nThe data has been tampered with or different signer has signed off this transaction.";
+                    message = "Transaction verification failed.\n\nThe data has been tampered with or different signer has signed off this transaction.";
                 }
             } catch (Exception ex) {
                 message = "Transaction failed verification.\n\nThe signer has no key pairs available.";
@@ -120,12 +120,12 @@ public class TransactionDetailsDialog extends JDialog {
     Transaction showDialog() {
         setData(transaction);
         setVisible(true);
-        if (isCancelled) return null;
+        if (isCancelled)
+            return null;
 
         try {
-            if (isNewTransaction) {
-                this.transaction.setTransactionId(UUID.randomUUID().toString());
-                ((Seller) cmbSigner.getModel().getSelectedItem()).digitallySign(this.transaction);
+            if (isNewTransaction || isModified(transaction)) {
+                getData(transaction);
                 return transaction;
             }
         } catch (Exception e) {
@@ -136,7 +136,6 @@ public class TransactionDetailsDialog extends JDialog {
 
     private void onOK() {
         // add your code here
-        getData(this.transaction);
         dispose();
     }
 
@@ -179,27 +178,33 @@ public class TransactionDetailsDialog extends JDialog {
     public boolean isModified(Transaction data) {
         if (txtTransactionId.getText() != null ?
                 !txtTransactionId.getText().equals(data.getTransactionId()) :
-                data.getTransactionId() != null) return true;
+                data.getTransactionId() != null)
+            return true;
         if (txtBuyerId.getText() != null ? !txtBuyerId.getText().equals(data.getBuyerId()) : data.getBuyerId() != null)
             return true;
         if (txtGameId.getText() != null ? !txtGameId.getText().equals(data.getGameId()) : data.getGameId() != null)
             return true;
         if (txtPublisherId.getText() != null ?
                 !txtPublisherId.getText().equals(data.getPublisherId()) :
-                data.getPublisherId() != null) return true;
+                data.getPublisherId() != null)
+            return true;
         if (txtLicenseCode.getText() != null ?
                 !txtLicenseCode.getText().equals(data.getLicenseCode()) :
-                data.getLicenseCode() != null) return true;
+                data.getLicenseCode() != null)
+            return true;
         if (txtAmountPaid.getText() != null ?
                 !new BigDecimal(txtAmountPaid.getText()).equals(data.getAmountPaid()) :
-                data.getAmountPaid() != null) return true;
+                data.getAmountPaid() != null)
+            return true;
         if (dtpTransactionDate.getDateTimePermissive() != null ?
                 !dtpTransactionDate.getDateTimePermissive()
                                    .isEqual(data.getTransactionDate().truncatedTo(ChronoUnit.MINUTES)) :
-                data.getTransactionDate() != null) return true;
+                data.getTransactionDate() != null)
+            return true;
         try {
             String sellerId = ((Seller) cmbSigner.getSelectedItem()).getSellerId();
-            if (sellerId != null ? !sellerId.equals(data.getSellerId()) : data.getSellerId() != null) return true;
+            if (sellerId != null ? !sellerId.equals(data.getSellerId()) : data.getSellerId() != null)
+                return true;
         } catch (Exception e) {
             return false;
         }

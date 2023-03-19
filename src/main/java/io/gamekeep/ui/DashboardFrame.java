@@ -2,7 +2,9 @@ package io.gamekeep.ui;
 
 import io.gamekeep.components.Block;
 import io.gamekeep.components.Blockchain;
+import io.gamekeep.components.Seller;
 import io.gamekeep.components.Transaction;
+import io.gamekeep.constants.GameKeepConstants;
 import io.gamekeep.ui.tablecellrenderers.CurrencyTableCellRenderer;
 import io.gamekeep.ui.tablemodels.TransactionTableModel;
 
@@ -11,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class DashboardFrame extends JFrame {
     private final TransactionTableModel mdlTransactions = new TransactionTableModel();
@@ -24,6 +27,7 @@ public class DashboardFrame extends JFrame {
     private JTextArea txtMerkleRoot;
     private JTextArea txtCurrentBlockHash;
     private JTable tblTransactions;
+    private JButton validateBlockchainButton;
     private int currentBlockIndex = Blockchain.getBlockchain().size() - 1;
 
     public DashboardFrame(String title) {
@@ -44,17 +48,44 @@ public class DashboardFrame extends JFrame {
                 JTable tbl = (JTable) e.getSource();
                 TransactionTableModel mdl = (TransactionTableModel) tbl.getModel();
                 if (row >= 0 && e.getClickCount() == 2) {
-                    TransactionDetailsDialog transactionDetailsDialog = new TransactionDetailsDialog(mdl.get(row));
-                    transactionDetailsDialog.showDialog();
+                    TransactionDetailsDialog transactionDetailsDialog = new TransactionDetailsDialog(
+                            mdl.get(row),
+                            false
+                    );
+                    Transaction transaction = transactionDetailsDialog.showDialog();
+                    if (transaction != null) {
+                        Blockchain.persist();
+
+                        refresh();
+                    }
                 }
             }
         });
 
         btnAddTransaction.addActionListener(e -> {
             Transaction transaction = new Transaction("", "", "", "", "", new BigDecimal("0"), LocalDateTime.now(), "");
-            TransactionDetailsDialog txnDialog = new TransactionDetailsDialog(transaction);
+            TransactionDetailsDialog txnDialog = new TransactionDetailsDialog(transaction, true);
             transaction = txnDialog.showDialog();
-            if (transaction != null) {
+            if (transaction != null && transaction.getTransactionId().equals("")) {
+                transaction.setTransactionId(UUID.randomUUID().toString());
+
+                try {
+                    String txSellerId = transaction.getSellerId();
+                    Seller slr = GameKeepConstants.SELLERS.stream()
+                                                          .filter(s -> s.getSellerId().equals(txSellerId))
+                                                          .findFirst()
+                                                          .get();
+                    slr.digitallySign(transaction);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Failed to create new transaction. Signer or Signer KeyPair does not exist.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
                 boolean isNewBlockCreated = Blockchain.pushTransaction(transaction);
                 if (isNewBlockCreated) {
                     JOptionPane.showMessageDialog(
@@ -66,19 +97,47 @@ public class DashboardFrame extends JFrame {
                     navigateBlock(1);
                     return;
                 }
-                txtCurrentBlockHash.setText(currentBlock.getBlockHash());
-                txtMerkleRoot.setText(currentBlock.getMerkleRoot());
-                mdlTransactions.fireTableDataChanged();
+
+                refresh();
             }
         });
 
         btnPrevious.addActionListener(e -> navigateBlock(-1));
         btnNext.addActionListener(e -> navigateBlock(1));
+
+        validateBlockchainButton.addActionListener(e -> {
+            for (int i = Blockchain.getBlockchain().size() - 1; i >= 1; i--) {
+                Block currentBlock = Blockchain.getBlockchain().get(i);
+                Block previousBlock = Blockchain.getBlockchain().get(i - 1);
+
+                if (!currentBlock.getPreviousBlockHash().equals(previousBlock.getBlockHash())) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            String.format(
+                                    "This blockchain is invalid, block [%1.16s] predecessor [%1.16s] does not exist.",
+                                    currentBlock.getBlockHash(),
+                                    currentBlock.getPreviousBlockHash()
+                            ),
+                            "Invalid Blockchain",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+            }
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "This blockchain is valid. All blocks have existing predecessors.",
+                    "Valid Blockchain",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        });
     }
 
     private void navigateBlock(int difference) {
         if (currentBlockIndex + difference > Blockchain.getBlockchain().size() - 1 ||
-            currentBlockIndex + difference < 0) return;
+            currentBlockIndex + difference < 0)
+            return;
 
         currentBlockIndex += difference;
         currentBlock = Blockchain.getBlockchain().get(currentBlockIndex);
