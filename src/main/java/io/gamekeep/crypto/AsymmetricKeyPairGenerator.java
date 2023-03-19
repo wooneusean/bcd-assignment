@@ -32,28 +32,24 @@ public class AsymmetricKeyPairGenerator {
         }
     }
 
-    public static KeyPair load(String path) {
-        return new KeyPair(
-                loadPublic(Paths.get(path, "public.key")),
-                loadPrivate(Paths.get(path, "private.key"))
-        );
+    public static KeyPair load(String path) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+        return new KeyPair(loadPublic(Paths.get(path, "public.key")), loadPrivate(Paths.get(path, "private.key")));
     }
 
-    public static PrivateKey loadPrivate(Path path) {
-        try {
-            PKCS8EncodedKeySpec prvKey = new PKCS8EncodedKeySpec(Files.readAllBytes(path));
-            return KeyFactory.getInstance("RSA").generatePrivate(prvKey);
-        } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+    public static PrivateKey loadPrivate(Path path) throws
+                                                    IOException,
+                                                    NoSuchAlgorithmException,
+                                                    InvalidKeySpecException {
+        PKCS8EncodedKeySpec prvKey = new PKCS8EncodedKeySpec(Files.readAllBytes(path));
+        return KeyFactory.getInstance("RSA").generatePrivate(prvKey);
     }
 
-    public static PublicKey loadPublic(Path path) {
-        try {
-            X509EncodedKeySpec pubKey = new X509EncodedKeySpec(Files.readAllBytes(path));
-            return KeyFactory.getInstance("RSA").generatePublic(pubKey);
-        } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+    public static PublicKey loadPublic(Path path) throws
+                                                  NoSuchAlgorithmException,
+                                                  InvalidKeySpecException,
+                                                  IOException {
+        X509EncodedKeySpec pubKey = new X509EncodedKeySpec(Files.readAllBytes(path));
+        return KeyFactory.getInstance("RSA").generatePublic(pubKey);
+
     }
 }

@@ -11,29 +11,27 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ListIterator;
 
 public class DashboardFrame extends JFrame {
     private final TransactionTableModel mdlTransactions = new TransactionTableModel();
-    private ListIterator<Block> blockListIterator = Blockchain.getBlockchain().listIterator(0);
     private Block currentBlock = Blockchain.getCurrentBlock();
     private JPanel contentPane;
     private JButton btnPrevious;
     private JButton btnNext;
     private JButton btnAddTransaction;
-    private JTextField txtPreviousBlockHash;
-    private JList<Transaction> lstTransactions;
+    private JTextArea txtPreviousBlockHash;
     private JTextField txtTimestamp;
-    private JTextField txtMerkleRoot;
-    private JTextField txtCurrentBlockHash;
+    private JTextArea txtMerkleRoot;
+    private JTextArea txtCurrentBlockHash;
     private JTable tblTransactions;
+    private int currentBlockIndex = Blockchain.getBlockchain().size() - 1;
 
     public DashboardFrame(String title) {
         super(title);
         setContentPane(contentPane);
-        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
+        setLocationRelativeTo(null);
 
         refresh();
 
@@ -45,7 +43,7 @@ public class DashboardFrame extends JFrame {
                 int row = tblTransactions.rowAtPoint(e.getPoint());
                 JTable tbl = (JTable) e.getSource();
                 TransactionTableModel mdl = (TransactionTableModel) tbl.getModel();
-                if (row >= 0 && e.getClickCount() >= 2) {
+                if (row >= 0 && e.getClickCount() == 2) {
                     TransactionDetailsDialog transactionDetailsDialog = new TransactionDetailsDialog(mdl.get(row));
                     transactionDetailsDialog.showDialog();
                 }
@@ -62,33 +60,28 @@ public class DashboardFrame extends JFrame {
                     JOptionPane.showMessageDialog(
                             this,
                             "The current block is full, creating new block.",
-                            "Current block full!",
+                            "Attention",
                             JOptionPane.INFORMATION_MESSAGE
                     );
-                    goToNextBlock();
+                    navigateBlock(1);
                     return;
                 }
+                txtCurrentBlockHash.setText(currentBlock.getBlockHash());
+                txtMerkleRoot.setText(currentBlock.getMerkleRoot());
                 mdlTransactions.fireTableDataChanged();
             }
         });
 
-        btnPrevious.addActionListener(e -> goToPrevBlock());
-        btnNext.addActionListener(e -> goToNextBlock());
+        btnPrevious.addActionListener(e -> navigateBlock(-1));
+        btnNext.addActionListener(e -> navigateBlock(1));
     }
 
-    private void goToPrevBlock() {
-        if (blockListIterator.hasPrevious()) {
-            System.out.println(blockListIterator.previousIndex());
-            currentBlock = blockListIterator.previous();
-        }
-        refresh();
-    }
+    private void navigateBlock(int difference) {
+        if (currentBlockIndex + difference > Blockchain.getBlockchain().size() - 1 ||
+            currentBlockIndex + difference < 0) return;
 
-    private void goToNextBlock() {
-        if (blockListIterator.hasNext()) {
-            System.out.println(blockListIterator.nextIndex());
-            currentBlock = blockListIterator.next();
-        }
+        currentBlockIndex += difference;
+        currentBlock = Blockchain.getBlockchain().get(currentBlockIndex);
         refresh();
     }
 
@@ -97,12 +90,8 @@ public class DashboardFrame extends JFrame {
         txtTimestamp.setText(String.valueOf(currentBlock.getTimestamp()));
         txtCurrentBlockHash.setText(currentBlock.getBlockHash());
         txtPreviousBlockHash.setText(currentBlock.getPreviousBlockHash());
-        btnNext.setEnabled(blockListIterator.hasNext());
-        btnPrevious.setEnabled(blockListIterator.hasPrevious());
+        btnNext.setEnabled(currentBlockIndex < Blockchain.getBlockchain().size() - 1);
+        btnPrevious.setEnabled(currentBlockIndex > 0);
         mdlTransactions.setTransactionList(currentBlock.getTransactions());
-    }
-
-    public JPanel getContentPane() {
-        return contentPane;
     }
 }

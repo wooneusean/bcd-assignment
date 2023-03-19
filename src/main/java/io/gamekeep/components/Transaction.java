@@ -2,11 +2,12 @@ package io.gamekeep.components;
 
 import io.gamekeep.crypto.Signer;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.security.PublicKey;
 import java.time.LocalDateTime;
 
-public class Transaction {
+public class Transaction implements Serializable {
     private String transactionId;
     private String buyerId;
     private String gameId;
@@ -40,16 +41,10 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return "{\"Transaction\":{" +
-               "\"transactionId\":\"" + transactionId + '\"' +
-               ", \"buyerId\":\"" + buyerId + '\"' +
-               ", \"gameId\":\"" + gameId + '\"' +
-               ", \"publisherId\":\"" + publisherId + '\"' +
-               ", \"licenseCode\":\"" + licenseCode + '\"' +
-               ", \"amountPaid\":" + amountPaid +
-               ", \"transactionDate\":" + transactionDate +
-               ", \"sellerId\":\"" + sellerId + '\"' +
-               "}}";
+        return "{\"Transaction\":{" + "\"transactionId\":\"" + transactionId + '\"' + ", \"buyerId\":\"" + buyerId +
+               '\"' + ", \"gameId\":\"" + gameId + '\"' + ", \"publisherId\":\"" + publisherId + '\"' +
+               ", \"licenseCode\":\"" + licenseCode + '\"' + ", \"amountPaid\":" + amountPaid +
+               ", \"transactionDate\":" + transactionDate + ", \"sellerId\":\"" + sellerId + '\"' + "}}";
     }
 
     public String getTransactionId() {

@@ -2,11 +2,12 @@ package io.gamekeep.components;
 
 import io.gamekeep.crypto.Hasher;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Block {
+public class Block implements Serializable {
     public static final int MAX_TRANSACTIONS = 2;
     private final List<Transaction> transactions = new ArrayList<>();
     private final String previousBlockHash;

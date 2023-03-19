@@ -1,16 +1,14 @@
 package io.gamekeep.components;
 
 import java.io.*;
-import java.util.Arrays;
 import java.util.LinkedList;
 
 public class Blockchain {
-    private static LinkedList<Block> blockchain = new LinkedList<>(Arrays.asList(new Block("0")));
+    private static LinkedList<Block> blockchain = new LinkedList<>();
     private static String filePath;
-    private static Block currentBlock;
 
     public static Block getCurrentBlock() {
-        return currentBlock;
+        return blockchain.getLast();
     }
 
     public static String getFilePath() {
@@ -26,7 +24,15 @@ public class Blockchain {
     }
 
     public static boolean pushTransaction(Transaction txn) {
-        currentBlock = blockchain.getLast();
+        Block currentBlock;
+        try {
+            currentBlock = blockchain.getLast();
+        } catch (Exception e) {
+            currentBlock = new Block("0");
+            blockchain.add(currentBlock);
+        }
+
+
         boolean isNewBlockCreated = false;
         if (currentBlock.getTransactions().size() >= Block.MAX_TRANSACTIONS) {
             currentBlock = new Block(currentBlock.getBlockHash());
@@ -34,24 +40,37 @@ public class Blockchain {
             isNewBlockCreated = true;
         }
         currentBlock.addTransaction(txn);
+        persist();
         return isNewBlockCreated;
     }
 
-    public static void load() {
-        try (FileInputStream f = new FileInputStream(filePath); ObjectInputStream o = new ObjectInputStream(f)) {
-            blockchain = (LinkedList<Block>) o.readObject();
-            System.out.println("Read from file");
+
+    @SuppressWarnings("unchecked")
+    public static boolean load() {
+        try (FileInputStream fs = new FileInputStream(filePath); ObjectInputStream os = new ObjectInputStream(fs)) {
+            blockchain = (LinkedList<Block>) os.readObject();
+            return true;
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            System.out.println("Blockchain.load() > No file to load.");
+            return false;
         }
     }
 
-    public static void persist() {
-        try (FileOutputStream f = new FileOutputStream(filePath); ObjectOutputStream o = new ObjectOutputStream(f)) {
-            o.writeObject(blockchain);
-            System.out.println("Saved to file");
+    public static boolean persist() {
+        File storageFile = new File(filePath);
+        storageFile.getParentFile().mkdirs();
+        try {
+            storageFile.createNewFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+
+        try (FileOutputStream fs = new FileOutputStream(storageFile); ObjectOutputStream os = new ObjectOutputStream(fs)) {
+            os.writeObject(blockchain);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
