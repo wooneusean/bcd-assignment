@@ -1,17 +1,13 @@
 package io.gamekeep.ui;
 
-import com.github.lgooddatepicker.components.DateTimePicker;
-import io.gamekeep.components.Seller;
 import io.gamekeep.components.Transaction;
-import io.gamekeep.constants.GameKeepConstants;
-import io.gamekeep.ui.documentfilters.NumberDocumentFilter;
+import io.gamekeep.components.User;
+import io.gamekeep.crypto.Encryptor;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.PlainDocument;
+import java.awt.*;
 import java.awt.event.*;
-import java.math.BigDecimal;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 
 public class TransactionDetailsDialog extends JDialog {
@@ -21,16 +17,20 @@ public class TransactionDetailsDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JTextField txtBuyerId;
+    private JTextField txtReceiverId;
     private JTextField txtTransactionId;
-    private JComboBox<Seller> cmbSigner;
-    private JTextField txtAmountPaid;
+    private JTextField txtSenderId;
     private JTextField txtLicenseCode;
-    private JTextField txtPublisherId;
     private JTextField txtGameId;
-    private DateTimePicker dtpTransactionDate;
+    private JTextField txtTransactionDate;
     private JTextArea txtSignature;
     private JButton btnVerifySignature;
+    private JButton btnDecrypt;
+    private JPanel pnlTransactionDate;
+    private JLabel lblSignature;
+    private JPanel pnlSignature;
+    private JScrollPane scrSignature;
+    private JPanel pnlTransactionId;
     private boolean isCancelled = false;
 
     public TransactionDetailsDialog(Transaction transaction, boolean isEditing) {
@@ -42,13 +42,17 @@ public class TransactionDetailsDialog extends JDialog {
         pack();
         setLocationRelativeTo(null);
 
-        cmbSigner.setModel(new DefaultComboBoxModel<>(GameKeepConstants.SELLERS.toArray(new Seller[0])));
-
-        if (!isEditing) {
+        if (isEditing) {
             isNewTransaction = false;
             setTitle("Transaction - " + transaction.getTransactionId());
             Arrays.stream(new JTextComponent[]{
-                    txtBuyerId, txtTransactionId, txtAmountPaid, txtLicenseCode, txtPublisherId, txtGameId, txtSignature
+                    txtReceiverId,
+                    txtTransactionDate,
+                    txtSenderId,
+                    txtTransactionId,
+                    txtLicenseCode,
+                    txtGameId,
+                    txtSignature
             }).forEach(c -> {
                 c.addMouseListener(new MouseAdapter() {
                     @Override
@@ -61,26 +65,17 @@ public class TransactionDetailsDialog extends JDialog {
 
                 c.setEditable(false);
             });
-            cmbSigner.setEnabled(false);
-            dtpTransactionDate.setEnabled(false);
+            btnDecrypt.setVisible(true);
             btnVerifySignature.setVisible(true);
+        } else {
+            pnlTransactionId.setVisible(false);
+            lblSignature.setVisible(false);
+            scrSignature.setVisible(false);
+            pnlTransactionDate.setVisible(false);
+            btnDecrypt.setVisible(false);
+            setPreferredSize(new Dimension(400, 200));
+            pack();
         }
-
-        ((PlainDocument) txtAmountPaid.getDocument()).setDocumentFilter(new NumberDocumentFilter());
-
-        txtAmountPaid.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (txtAmountPaid.getText().equals("0"))
-                    txtAmountPaid.setText("");
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (txtAmountPaid.getText().equals(""))
-                    txtAmountPaid.setText("0");
-            }
-        });
 
         buttonOK.addActionListener(e -> onOK());
 
@@ -102,10 +97,10 @@ public class TransactionDetailsDialog extends JDialog {
         );
 
         btnVerifySignature.addActionListener(e -> {
-            Seller seller = ((Seller) cmbSigner.getSelectedItem());
-            String message = "";
+            User user = new User(txtSenderId.getText());
+            String message;
             try {
-                if (this.transaction.verifySignature(seller.getKeyPair().getPublic())) {
+                if (this.transaction.verifySignature(user.getKeyPair().getPublic())) {
                     message = "Transaction verification success.\n\nThe data has not been tampered with.";
                 } else {
                     message = "Transaction verification failed.\n\nThe data has been tampered with or different signer has signed off this transaction.";
@@ -114,6 +109,23 @@ public class TransactionDetailsDialog extends JDialog {
                 message = "Transaction failed verification.\n\nThe signer has no key pairs available.";
             }
             JOptionPane.showMessageDialog(this, message, "Data Integrity Status", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        btnDecrypt.addActionListener(e -> {
+            try {
+                JOptionPane.showMessageDialog(this,
+                                              "Decrypted License Code:\n\n" +
+                                              Encryptor.decrypt(transaction.getLicenseCode(),
+                                                                new User(transaction.getReceiverId()).getKeyPair()
+                                                                        .getPrivate()),
+                                              "Decryption Success",
+                                              JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,
+                                              "Failed to decrypt license code.",
+                                              "Decryption Error",
+                                              JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 
@@ -147,32 +159,21 @@ public class TransactionDetailsDialog extends JDialog {
 
     public void setData(Transaction data) {
         txtTransactionId.setText(data.getTransactionId());
-        txtBuyerId.setText(data.getBuyerId());
+        txtReceiverId.setText(data.getReceiverId());
         txtGameId.setText(data.getGameId());
-        txtPublisherId.setText(data.getPublisherId());
         txtLicenseCode.setText(data.getLicenseCode());
-        txtAmountPaid.setText(data.getAmountPaid().toString());
-        dtpTransactionDate.setDateTimePermissive(data.getTransactionDate());
+        txtTransactionDate.setText(data.getTransactionDate());
         txtSignature.setText(data.getSignature());
-        try {
-            cmbSigner.setSelectedItem(GameKeepConstants.SELLERS.stream()
-                                                               .filter(s -> s.getSellerId().equals(data.getSellerId()))
-                                                               .findFirst()
-                                                               .get());
-        } catch (Exception e) {
-            cmbSigner.setSelectedIndex(-1);
-        }
+        txtSenderId.setText(data.getSenderId());
     }
 
     public void getData(Transaction data) {
         data.setTransactionId(txtTransactionId.getText());
-        data.setBuyerId(txtBuyerId.getText());
+        data.setReceiverId(txtReceiverId.getText());
         data.setGameId(txtGameId.getText());
-        data.setPublisherId(txtPublisherId.getText());
         data.setLicenseCode(txtLicenseCode.getText());
-        data.setAmountPaid(new BigDecimal(txtAmountPaid.getText()));
-        data.setTransactionDate(dtpTransactionDate.getDateTimePermissive());
-        data.setSellerId(((Seller) cmbSigner.getSelectedItem()).getSellerId());
+        data.setTransactionDate(txtTransactionDate.getText());
+        data.setSenderId(txtSenderId.getText());
     }
 
     public boolean isModified(Transaction data) {
@@ -180,34 +181,22 @@ public class TransactionDetailsDialog extends JDialog {
                 !txtTransactionId.getText().equals(data.getTransactionId()) :
                 data.getTransactionId() != null)
             return true;
-        if (txtBuyerId.getText() != null ? !txtBuyerId.getText().equals(data.getBuyerId()) : data.getBuyerId() != null)
+        if (txtReceiverId.getText() != null ?
+                !txtReceiverId.getText().equals(data.getReceiverId()) :
+                data.getReceiverId() != null)
             return true;
         if (txtGameId.getText() != null ? !txtGameId.getText().equals(data.getGameId()) : data.getGameId() != null)
-            return true;
-        if (txtPublisherId.getText() != null ?
-                !txtPublisherId.getText().equals(data.getPublisherId()) :
-                data.getPublisherId() != null)
             return true;
         if (txtLicenseCode.getText() != null ?
                 !txtLicenseCode.getText().equals(data.getLicenseCode()) :
                 data.getLicenseCode() != null)
             return true;
-        if (txtAmountPaid.getText() != null ?
-                !new BigDecimal(txtAmountPaid.getText()).equals(data.getAmountPaid()) :
-                data.getAmountPaid() != null)
-            return true;
-        if (dtpTransactionDate.getDateTimePermissive() != null ?
-                !dtpTransactionDate.getDateTimePermissive()
-                                   .isEqual(data.getTransactionDate().truncatedTo(ChronoUnit.MINUTES)) :
+        if (txtTransactionDate.getText() != null ?
+                !txtTransactionDate.getText().equals(data.getTransactionDate()) :
                 data.getTransactionDate() != null)
             return true;
-        try {
-            String sellerId = ((Seller) cmbSigner.getSelectedItem()).getSellerId();
-            if (sellerId != null ? !sellerId.equals(data.getSellerId()) : data.getSellerId() != null)
-                return true;
-        } catch (Exception e) {
-            return false;
-        }
-        return false;
+        return txtSenderId.getText() != null ?
+                !txtSenderId.getText().equals(data.getSenderId()) :
+                data.getSenderId() != null;
     }
 }

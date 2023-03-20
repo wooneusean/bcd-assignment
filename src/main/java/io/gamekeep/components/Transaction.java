@@ -3,48 +3,44 @@ package io.gamekeep.components;
 import io.gamekeep.crypto.Signer;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.security.PublicKey;
-import java.time.LocalDateTime;
 
 public class Transaction implements Serializable {
     private String transactionId;
-    private String buyerId;
+    private String senderId;
+    private String receiverId;
     private String gameId;
-    private String publisherId;
     private String licenseCode;
-    private BigDecimal amountPaid;
-    private LocalDateTime transactionDate;
-    private String sellerId;
+    private String transactionDate;
     private String signature;
 
     public Transaction(
             String transactionId,
-            String buyerId,
+            String receiverId,
             String gameId,
-            String publisherId,
             String licenseCode,
-            BigDecimal amountPaid,
-            LocalDateTime transactionDate,
-            String sellerId
+            String transactionDate,
+            String senderId
     ) {
         this.transactionId = transactionId;
-        this.buyerId = buyerId;
+        this.receiverId = receiverId;
         this.gameId = gameId;
-        this.publisherId = publisherId;
         this.licenseCode = licenseCode;
-        this.amountPaid = amountPaid;
         this.transactionDate = transactionDate;
-        this.sellerId = sellerId;
+        this.senderId = senderId;
         this.signature = "";
     }
 
     @Override
     public String toString() {
-        return "{\"Transaction\":{" + "\"transactionId\":\"" + transactionId + '\"' + ", \"buyerId\":\"" + buyerId +
-               '\"' + ", \"gameId\":\"" + gameId + '\"' + ", \"publisherId\":\"" + publisherId + '\"' +
-               ", \"licenseCode\":\"" + licenseCode + '\"' + ", \"amountPaid\":" + amountPaid +
-               ", \"transactionDate\":" + transactionDate + ", \"sellerId\":\"" + sellerId + '\"' + "}}";
+        return "{\"Transaction\":{" +
+                "\"transactionId\":\"" + transactionId + '\"' +
+                ", \"buyerId\":\"" + receiverId + '\"' +
+                ", \"gameId\":\"" + gameId + '\"' +
+                ", \"licenseCode\":\"" + licenseCode + '\"' +
+                ", \"transactionDate\":" + transactionDate +
+                ", \"sellerId\":\"" + senderId + '\"' +
+                "}}";
     }
 
     public String getTransactionId() {
@@ -55,12 +51,12 @@ public class Transaction implements Serializable {
         this.transactionId = transactionId;
     }
 
-    public String getBuyerId() {
-        return buyerId;
+    public String getReceiverId() {
+        return receiverId;
     }
 
-    public void setBuyerId(String buyerId) {
-        this.buyerId = buyerId;
+    public void setReceiverId(String receiverId) {
+        this.receiverId = receiverId;
     }
 
     public String getGameId() {
@@ -71,14 +67,6 @@ public class Transaction implements Serializable {
         this.gameId = gameId;
     }
 
-    public String getPublisherId() {
-        return publisherId;
-    }
-
-    public void setPublisherId(String publisherId) {
-        this.publisherId = publisherId;
-    }
-
     public String getLicenseCode() {
         return licenseCode;
     }
@@ -87,28 +75,20 @@ public class Transaction implements Serializable {
         this.licenseCode = licenseCode;
     }
 
-    public BigDecimal getAmountPaid() {
-        return amountPaid;
-    }
-
-    public void setAmountPaid(BigDecimal amountPaid) {
-        this.amountPaid = amountPaid;
-    }
-
-    public LocalDateTime getTransactionDate() {
+    public String getTransactionDate() {
         return transactionDate;
     }
 
-    public void setTransactionDate(LocalDateTime transactionDate) {
+    public void setTransactionDate(String transactionDate) {
         this.transactionDate = transactionDate;
     }
 
-    public String getSellerId() {
-        return sellerId;
+    public String getSenderId() {
+        return senderId;
     }
 
-    public void setSellerId(String sellerId) {
-        this.sellerId = sellerId;
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
     }
 
     public String getSignature() {

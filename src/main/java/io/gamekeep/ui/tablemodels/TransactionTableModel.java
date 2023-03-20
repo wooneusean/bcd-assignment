@@ -3,7 +3,6 @@ package io.gamekeep.ui.tablemodels;
 import io.gamekeep.components.Transaction;
 
 import javax.swing.table.AbstractTableModel;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,12 +39,10 @@ public class TransactionTableModel extends AbstractTableModel {
             case 0:
                 return "Transaction ID";
             case 1:
-                return "Buyer ID";
+                return "Sender ID";
             case 2:
-                return "Seller ID";
+                return "Receiver ID";
             case 3:
-                return "Amount Paid";
-            case 4:
                 return "Transaction Date";
         }
         return null;
@@ -59,8 +56,6 @@ public class TransactionTableModel extends AbstractTableModel {
             case 2:
                 return String.class;
             case 3:
-                return BigDecimal.class;
-            case 4:
                 return LocalDateTime.class;
         }
         return Object.class;
@@ -73,13 +68,11 @@ public class TransactionTableModel extends AbstractTableModel {
     public void setRowValue(int rowIndex, Transaction newTxn) {
         Transaction txn = transactionList.get(rowIndex);
         txn.setTransactionId(newTxn.getTransactionId());
-        txn.setBuyerId(newTxn.getBuyerId());
+        txn.setReceiverId(newTxn.getReceiverId());
         txn.setGameId(newTxn.getGameId());
-        txn.setPublisherId(newTxn.getPublisherId());
         txn.setLicenseCode(newTxn.getLicenseCode());
-        txn.setAmountPaid(newTxn.getAmountPaid());
         txn.setTransactionDate(newTxn.getTransactionDate());
-        txn.setSellerId(newTxn.getSellerId());
+        txn.setSenderId(newTxn.getSenderId());
         txn.setSignature(newTxn.getSignature());
         fireTableRowsUpdated(rowIndex, rowIndex);
     }
@@ -91,12 +84,10 @@ public class TransactionTableModel extends AbstractTableModel {
             case 0:
                 return txn.getTransactionId();
             case 1:
-                return txn.getBuyerId();
+                return txn.getSenderId();
             case 2:
-                return txn.getSellerId();
+                return txn.getReceiverId();
             case 3:
-                return txn.getAmountPaid();
-            case 4:
                 return txn.getTransactionDate();
         }
         return null;

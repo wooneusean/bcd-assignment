@@ -1,5 +1,6 @@
 package io.gamekeep.components;
 
+import io.gamekeep.constants.AppConstants;
 import io.gamekeep.crypto.Hasher;
 
 import java.io.Serializable;
@@ -26,8 +27,11 @@ public class Block implements Serializable {
 
     @Override
     public String toString() {
-        return "{\"Block\":{" + "\"transactions\":" + transactions + ", \"previousBlockHash\":\"" + previousBlockHash +
-               '\"' + ", \"timestamp\":" + timestamp + "}}";
+        return "{\"Block\":{" +
+                "\"transactions\":" + transactions +
+                ", \"previousBlockHash\":\"" + previousBlockHash + '\"' +
+                ", \"timestamp\":" + timestamp +
+                "}}";
     }
 
     public List<Transaction> getTransactions() {
@@ -35,7 +39,7 @@ public class Block implements Serializable {
     }
 
     public String getBlockHash() {
-        return Hasher.hash(previousBlockHash, String.valueOf(timestamp), getMerkleRoot());
+        return Hasher.hash(previousBlockHash, String.valueOf(timestamp), getMerkleRoot(), AppConstants.GAME_KEEP_SALT);
     }
 
     public String getPreviousBlockHash() {
@@ -46,13 +50,13 @@ public class Block implements Serializable {
         if (transactions.size() == 0) return "";
 
         List<String> merkleNodes = transactions.stream()
-                                               .map(txn -> Hasher.hash(txn.toString()))
-                                               .collect(Collectors.toList());
+                .map(txn -> Hasher.hash(txn.toString(), AppConstants.GAME_KEEP_SALT))
+                .collect(Collectors.toList());
 
         while (merkleNodes.size() > 1) {
             String left = merkleNodes.remove(0);
             String right = merkleNodes.remove(0);
-            merkleNodes.add(Hasher.hash(left, right));
+            merkleNodes.add(Hasher.hash(left, right, AppConstants.GAME_KEEP_SALT));
         }
         return merkleNodes.get(0);
     }

@@ -7,50 +7,49 @@ import java.io.Serializable;
 import java.security.KeyPair;
 import java.util.Objects;
 
-public class Seller implements Serializable {
-    private final String sellerId;
+public class User implements Serializable {
+    private final String userId;
     private KeyPair keyPair;
 
-    public Seller(String sellerId) {
-        this.sellerId = sellerId;
+    public User(String userId) {
+        this.userId = userId;
         loadKeys();
     }
 
     @Override
     public String toString() {
-        return sellerId;
+        return userId;
     }
 
-    public Transaction digitallySign(Transaction txn) throws Exception {
+    public void digitallySign(Transaction txn) throws Exception {
         String signature = Signer.sign(txn.toString(), keyPair.getPrivate());
         txn.setSignature(signature);
-        return txn;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Seller seller = (Seller) o;
-        return sellerId.equals(seller.sellerId);
+        User user = (User) o;
+        return userId.equals(user.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sellerId);
+        return Objects.hash(userId);
     }
 
     private void loadKeys() {
         try {
-            keyPair = AsymmetricKeyPairGenerator.load("keys/" + sellerId);
+            keyPair = AsymmetricKeyPairGenerator.load("keys/" + userId);
         } catch (Exception e) {
             keyPair = AsymmetricKeyPairGenerator.generate();
-            AsymmetricKeyPairGenerator.save(keyPair, "keys/" + sellerId);
+            AsymmetricKeyPairGenerator.save(keyPair, "keys/" + userId);
         }
     }
 
-    public String getSellerId() {
-        return sellerId;
+    public String getUserId() {
+        return userId;
     }
 
     public KeyPair getKeyPair() {

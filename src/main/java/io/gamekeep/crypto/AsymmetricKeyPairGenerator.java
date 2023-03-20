@@ -37,17 +37,17 @@ public class AsymmetricKeyPairGenerator {
     }
 
     public static PrivateKey loadPrivate(Path path) throws
-                                                    IOException,
-                                                    NoSuchAlgorithmException,
-                                                    InvalidKeySpecException {
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeySpecException {
         PKCS8EncodedKeySpec prvKey = new PKCS8EncodedKeySpec(Files.readAllBytes(path));
         return KeyFactory.getInstance("RSA").generatePrivate(prvKey);
     }
 
     public static PublicKey loadPublic(Path path) throws
-                                                  NoSuchAlgorithmException,
-                                                  InvalidKeySpecException,
-                                                  IOException {
+            NoSuchAlgorithmException,
+            InvalidKeySpecException,
+            IOException {
         X509EncodedKeySpec pubKey = new X509EncodedKeySpec(Files.readAllBytes(path));
         return KeyFactory.getInstance("RSA").generatePublic(pubKey);
 

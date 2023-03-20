@@ -2,9 +2,9 @@ package io.gamekeep.ui;
 
 import io.gamekeep.components.Block;
 import io.gamekeep.components.Blockchain;
-import io.gamekeep.components.Seller;
 import io.gamekeep.components.Transaction;
-import io.gamekeep.constants.GameKeepConstants;
+import io.gamekeep.components.User;
+import io.gamekeep.crypto.Encryptor;
 import io.gamekeep.ui.tablecellrenderers.CurrencyTableCellRenderer;
 import io.gamekeep.ui.tablemodels.TransactionTableModel;
 
@@ -50,7 +50,7 @@ public class DashboardFrame extends JFrame {
                 if (row >= 0 && e.getClickCount() == 2) {
                     TransactionDetailsDialog transactionDetailsDialog = new TransactionDetailsDialog(
                             mdl.get(row),
-                            false
+                            true
                     );
                     Transaction transaction = transactionDetailsDialog.showDialog();
                     if (transaction != null) {
@@ -63,19 +63,17 @@ public class DashboardFrame extends JFrame {
         });
 
         btnAddTransaction.addActionListener(e -> {
-            Transaction transaction = new Transaction("", "", "", "", "", new BigDecimal("0"), LocalDateTime.now(), "");
-            TransactionDetailsDialog txnDialog = new TransactionDetailsDialog(transaction, true);
+            Transaction transaction = new Transaction("", "", "", "", LocalDateTime.now().toString(), "");
+            TransactionDetailsDialog txnDialog = new TransactionDetailsDialog(transaction, false);
             transaction = txnDialog.showDialog();
             if (transaction != null && transaction.getTransactionId().equals("")) {
                 transaction.setTransactionId(UUID.randomUUID().toString());
 
                 try {
-                    String txSellerId = transaction.getSellerId();
-                    Seller slr = GameKeepConstants.SELLERS.stream()
-                                                          .filter(s -> s.getSellerId().equals(txSellerId))
-                                                          .findFirst()
-                                                          .get();
-                    slr.digitallySign(transaction);
+                    User receiver = new User(transaction.getReceiverId());
+                    transaction.setLicenseCode(Encryptor.encrypt(transaction.getLicenseCode(), receiver.getKeyPair().getPublic()));
+                    User sender = new User(transaction.getSenderId());
+                    sender.digitallySign(transaction);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(
                             this,
@@ -136,7 +134,7 @@ public class DashboardFrame extends JFrame {
 
     private void navigateBlock(int difference) {
         if (currentBlockIndex + difference > Blockchain.getBlockchain().size() - 1 ||
-            currentBlockIndex + difference < 0)
+                currentBlockIndex + difference < 0)
             return;
 
         currentBlockIndex += difference;

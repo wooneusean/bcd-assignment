@@ -2,10 +2,11 @@ package io.gamekeep.components;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 
 public class Blockchain {
-    private static LinkedList<Block> blockchain = new LinkedList<>(Arrays.asList(new Block("0")));
+    private static LinkedList<Block> blockchain = new LinkedList<>(Collections.singletonList(new Block("0")));
     private static String filePath;
 
     public static Block getCurrentBlock() {
