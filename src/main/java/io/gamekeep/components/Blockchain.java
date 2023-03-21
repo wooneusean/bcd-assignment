@@ -1,15 +1,18 @@
 package io.gamekeep.components;
 
 import java.io.*;
-import java.util.Collections;
 import java.util.LinkedList;
 
 public class Blockchain {
-    private static LinkedList<Block> blockchain = new LinkedList<>(Collections.singletonList(new Block("0")));
+    private static LinkedList<Block> blockchain = new LinkedList<>();
     private static String filePath;
 
     public static Block getCurrentBlock() {
-        return blockchain.getLast();
+        try {
+            return blockchain.getLast();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static String getFilePath() {
@@ -25,9 +28,16 @@ public class Blockchain {
     }
 
     public static boolean pushTransaction(Transaction txn) {
-        Block currentBlock = blockchain.getLast();
-
+        Block currentBlock;
         boolean isNewBlockCreated = false;
+        try {
+            currentBlock = blockchain.getLast();
+        } catch (Exception e) {
+            currentBlock = new Block("0");
+            blockchain.add(currentBlock);
+            isNewBlockCreated = true;
+        }
+
         if (currentBlock.getTransactions().size() >= Block.MAX_TRANSACTIONS) {
             currentBlock = new Block(currentBlock.getBlockHash());
             blockchain.add(currentBlock);

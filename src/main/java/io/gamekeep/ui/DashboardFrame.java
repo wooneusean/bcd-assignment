@@ -90,7 +90,7 @@ public class DashboardFrame extends JFrame {
                 if (isNewBlockCreated) {
                     JOptionPane.showMessageDialog(
                             this,
-                            "The current block is full, creating new block.",
+                            "New block created.",
                             "Attention",
                             JOptionPane.INFORMATION_MESSAGE
                     );
@@ -145,12 +145,16 @@ public class DashboardFrame extends JFrame {
     }
 
     private void refresh() {
+        txtCurrentBlockHash.setText("0");
+        btnNext.setEnabled(currentBlockIndex < Blockchain.getBlockchain().size() - 1);
+        btnPrevious.setEnabled(currentBlockIndex > 0);
+
+        if (currentBlock == null) return;
+
         txtMerkleRoot.setText(currentBlock.getMerkleRoot());
         txtTimestamp.setText(String.valueOf(currentBlock.getTimestamp()));
         txtCurrentBlockHash.setText(currentBlock.getBlockHash());
         txtPreviousBlockHash.setText(currentBlock.getPreviousBlockHash());
-        btnNext.setEnabled(currentBlockIndex < Blockchain.getBlockchain().size() - 1);
-        btnPrevious.setEnabled(currentBlockIndex > 0);
         mdlTransactions.setTransactionList(currentBlock.getTransactions());
     }
 }
