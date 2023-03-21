@@ -48,6 +48,24 @@ public class Blockchain {
         return isNewBlockCreated;
     }
 
+    public static boolean verifyBlockchain() {
+        for (int i = Blockchain.getBlockchain().size() - 1; i >= 1; i--) {
+            Block currentBlock = Blockchain.getBlockchain().get(i);
+            Block previousBlock = Blockchain.getBlockchain().get(i - 1);
+
+            if (!currentBlock.getPreviousBlockHash().equals(previousBlock.getBlockHash()) &&
+                !currentBlock.getPreviousBlockHash().equals("0")) {
+                throw new RuntimeException(
+                        String.format(
+                                "This blockchain is invalid, block [%1.16s] predecessor [%1.16s] does not exist.",
+                                currentBlock.getBlockHash(),
+                                currentBlock.getPreviousBlockHash()
+                        )
+                );
+            }
+        }
+        return true;
+    }
 
     @SuppressWarnings("unchecked")
     public static boolean load() {

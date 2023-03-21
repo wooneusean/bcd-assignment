@@ -106,23 +106,16 @@ public class DashboardFrame extends JFrame {
         btnNext.addActionListener(e -> navigateBlock(1));
 
         validateBlockchainButton.addActionListener(e -> {
-            for (int i = Blockchain.getBlockchain().size() - 1; i >= 1; i--) {
-                Block currentBlock = Blockchain.getBlockchain().get(i);
-                Block previousBlock = Blockchain.getBlockchain().get(i - 1);
-
-                if (!currentBlock.getPreviousBlockHash().equals(previousBlock.getBlockHash())) {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            String.format(
-                                    "This blockchain is invalid, block [%1.16s] predecessor [%1.16s] does not exist.",
-                                    currentBlock.getBlockHash(),
-                                    currentBlock.getPreviousBlockHash()
-                            ),
-                            "Invalid Blockchain",
-                            JOptionPane.ERROR_MESSAGE
-                    );
-                    return;
-                }
+            try {
+                Blockchain.verifyBlockchain();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        ex.getMessage(),
+                        "Invalid Blockchain",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
             }
 
             JOptionPane.showMessageDialog(

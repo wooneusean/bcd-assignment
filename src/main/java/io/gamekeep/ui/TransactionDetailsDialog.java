@@ -97,10 +97,10 @@ public class TransactionDetailsDialog extends JDialog {
         );
 
         btnVerifySignature.addActionListener(e -> {
-            User user = new User(txtSenderId.getText());
+            User sender = new User(txtSenderId.getText());
             String message;
             try {
-                if (this.transaction.verifySignature(user.getKeyPair().getPublic())) {
+                if (this.transaction.verifySignature(sender.getKeyPair().getPublic())) {
                     message = "Transaction verification success.\n\nThe data has not been tampered with.";
                 } else {
                     message = "Transaction verification failed.\n\nThe data has been tampered with or different signer has signed off this transaction.";
@@ -113,8 +113,9 @@ public class TransactionDetailsDialog extends JDialog {
 
         btnDecrypt.addActionListener(e -> {
             try {
-                if (!User.keyFilesExists(transaction.getSenderId()) || !User.keyFilesExists(transaction.getReceiverId())) {
-                   throw new RuntimeException("User key files does not exist.");
+                if (!User.keyFilesExists(transaction.getSenderId()) ||
+                    !User.keyFilesExists(transaction.getReceiverId())) {
+                    throw new RuntimeException("User key files does not exist.");
                 }
 
                 User sender = new User(transaction.getSenderId());

@@ -3,10 +3,15 @@ package io.gamekeep;
 import com.formdev.flatlaf.FlatLightLaf;
 import io.gamekeep.components.Blockchain;
 import io.gamekeep.ui.DashboardFrame;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import java.security.Security;
 
 public class Main {
     public static void main(String[] args) {
         FlatLightLaf.setup();
+        Security.addProvider(new BouncyCastleProvider());
+
         Blockchain.setFilePath("blockchain/data.bin");
         Blockchain.load();
 

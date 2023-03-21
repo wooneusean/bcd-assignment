@@ -17,7 +17,6 @@ import java.security.spec.X509EncodedKeySpec;
 public class AsymmetricKeyPairGenerator {
     public static KeyPair generate() {
         try {
-            Security.addProvider(new BouncyCastleProvider());
             String curveName = "secp256r1";
             KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC", BouncyCastleProvider.PROVIDER_NAME);
             kpg.initialize(new ECGenParameterSpec(curveName));
