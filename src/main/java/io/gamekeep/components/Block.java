@@ -20,18 +20,20 @@ public class Block implements Serializable {
     }
 
     public boolean addTransaction(Transaction txn) {
-        if (transactions.size() >= MAX_TRANSACTIONS) throw new RuntimeException(
-                "Maximum number of transactions for this block reached. (MAX_TRANSACTIONS = " + MAX_TRANSACTIONS + ")");
+        if (transactions.size() >= MAX_TRANSACTIONS)
+            throw new RuntimeException("Maximum number of transactions for this block reached. (MAX_TRANSACTIONS = " +
+                                       MAX_TRANSACTIONS +
+                                       ")");
         return transactions.add(txn);
     }
 
     @Override
     public String toString() {
         return "{\"Block\":{" +
-                "\"transactions\":" + transactions +
-                ", \"previousBlockHash\":\"" + previousBlockHash + '\"' +
-                ", \"timestamp\":" + timestamp +
-                "}}";
+               "\"transactions\":" + transactions +
+               ", \"previousBlockHash\":\"" + previousBlockHash + '\"' +
+               ", \"timestamp\":" + timestamp +
+               "}}";
     }
 
     public List<Transaction> getTransactions() {
@@ -50,8 +52,8 @@ public class Block implements Serializable {
         if (transactions.size() == 0) return "";
 
         List<String> merkleNodes = transactions.stream()
-                .map(txn -> Hasher.hash(txn.toString(), AppConstants.GAME_KEEP_SALT))
-                .collect(Collectors.toList());
+                                               .map(txn -> Hasher.hash(txn.toString(), AppConstants.GAME_KEEP_SALT))
+                                               .collect(Collectors.toList());
 
         while (merkleNodes.size() > 1) {
             String left = merkleNodes.remove(0);

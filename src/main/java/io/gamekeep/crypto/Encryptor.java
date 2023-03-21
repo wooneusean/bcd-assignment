@@ -12,11 +12,11 @@ import java.util.Base64;
 
 public class Encryptor {
     public static String decrypt(String ciphertext, PrivateKey key) throws
-            InvalidKeyException,
-            IllegalBlockSizeException,
-            BadPaddingException,
-            NoSuchPaddingException,
-            NoSuchAlgorithmException {
+                                                                    InvalidKeyException,
+                                                                    IllegalBlockSizeException,
+                                                                    BadPaddingException,
+                                                                    NoSuchPaddingException,
+                                                                    NoSuchAlgorithmException {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, key);
         byte[] plainBytes = cipher.doFinal(Base64.getDecoder().decode(ciphertext));
@@ -25,11 +25,11 @@ public class Encryptor {
     }
 
     public static String encrypt(String plaintext, PublicKey key) throws
-            InvalidKeyException,
-            IllegalBlockSizeException,
-            BadPaddingException,
-            NoSuchPaddingException,
-            NoSuchAlgorithmException {
+                                                                  InvalidKeyException,
+                                                                  IllegalBlockSizeException,
+                                                                  BadPaddingException,
+                                                                  NoSuchPaddingException,
+                                                                  NoSuchAlgorithmException {
         Cipher cipher = Cipher.getInstance("RSA");
         String ciphertext;
 

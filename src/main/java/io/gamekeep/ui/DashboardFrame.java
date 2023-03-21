@@ -71,7 +71,8 @@ public class DashboardFrame extends JFrame {
 
                 try {
                     User receiver = new User(transaction.getReceiverId());
-                    transaction.setLicenseCode(Encryptor.encrypt(transaction.getLicenseCode(), receiver.getKeyPair().getPublic()));
+                    transaction.setLicenseCode(Encryptor.encrypt(transaction.getLicenseCode(),
+                                                                 receiver.getKeyPair().getPublic()));
                     User sender = new User(transaction.getSenderId());
                     sender.digitallySign(transaction);
                 } catch (Exception ex) {
@@ -134,7 +135,7 @@ public class DashboardFrame extends JFrame {
 
     private void navigateBlock(int difference) {
         if (currentBlockIndex + difference > Blockchain.getBlockchain().size() - 1 ||
-                currentBlockIndex + difference < 0)
+            currentBlockIndex + difference < 0)
             return;
 
         currentBlockIndex += difference;

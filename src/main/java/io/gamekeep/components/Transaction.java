@@ -34,13 +34,13 @@ public class Transaction implements Serializable {
     @Override
     public String toString() {
         return "{\"Transaction\":{" +
-                "\"transactionId\":\"" + transactionId + '\"' +
-                ", \"buyerId\":\"" + receiverId + '\"' +
-                ", \"gameId\":\"" + gameId + '\"' +
-                ", \"licenseCode\":\"" + licenseCode + '\"' +
-                ", \"transactionDate\":" + transactionDate +
-                ", \"sellerId\":\"" + senderId + '\"' +
-                "}}";
+               "\"transactionId\":\"" + transactionId + '\"' +
+               ", \"buyerId\":\"" + receiverId + '\"' +
+               ", \"gameId\":\"" + gameId + '\"' +
+               ", \"licenseCode\":\"" + licenseCode + '\"' +
+               ", \"transactionDate\":" + transactionDate +
+               ", \"sellerId\":\"" + senderId + '\"' +
+               "}}";
     }
 
     public String getTransactionId() {

@@ -117,7 +117,7 @@ public class TransactionDetailsDialog extends JDialog {
                                               "Decrypted License Code:\n\n" +
                                               Encryptor.decrypt(transaction.getLicenseCode(),
                                                                 new User(transaction.getReceiverId()).getKeyPair()
-                                                                        .getPrivate()),
+                                                                                                     .getPrivate()),
                                               "Decryption Success",
                                               JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
