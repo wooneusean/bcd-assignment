@@ -3,8 +3,8 @@
     <output-path>$PROJECT_DIR$/out/artifacts/kotg_jar</output-path>
     <root id="archive" name="kotg.jar">
       <element id="module-output" name="kotg" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../.m2/repository/org/bouncycastle/bcprov-jdk16/1.46/bcprov-jdk16-1.46.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../../.m2/repository/com/formdev/flatlaf/3.0/flatlaf-3.0.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/../../.m2/repository/com/github/lgooddatepicker/LGoodDatePicker/11.2.1/LGoodDatePicker-11.2.1.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
