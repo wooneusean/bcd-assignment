@@ -71,9 +71,10 @@ public class DashboardFrame extends JFrame {
 
                 try {
                     User receiver = new User(transaction.getReceiverId());
-                    transaction.setLicenseCode(Encryptor.encrypt(transaction.getLicenseCode(),
-                                                                 receiver.getKeyPair().getPublic()));
                     User sender = new User(transaction.getSenderId());
+                    transaction.setLicenseCode(Encryptor.encrypt(transaction.getLicenseCode(),
+                                                                 sender.getKeyPair().getPrivate(),
+                                                                 receiver.getKeyPair().getPublic()));
                     sender.digitallySign(transaction);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(

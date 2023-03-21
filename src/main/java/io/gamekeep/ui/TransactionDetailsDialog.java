@@ -113,11 +113,17 @@ public class TransactionDetailsDialog extends JDialog {
 
         btnDecrypt.addActionListener(e -> {
             try {
+                if (!User.keyFilesExists(transaction.getSenderId()) || !User.keyFilesExists(transaction.getReceiverId())) {
+                   throw new RuntimeException("User key files does not exist.");
+                }
+
+                User sender = new User(transaction.getSenderId());
+                User receiver = new User(transaction.getReceiverId());
                 JOptionPane.showMessageDialog(this,
                                               "Decrypted License Code:\n\n" +
                                               Encryptor.decrypt(transaction.getLicenseCode(),
-                                                                new User(transaction.getReceiverId()).getKeyPair()
-                                                                                                     .getPrivate()),
+                                                                receiver.getKeyPair().getPrivate(),
+                                                                sender.getKeyPair().getPublic()),
                                               "Decryption Success",
                                               JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {

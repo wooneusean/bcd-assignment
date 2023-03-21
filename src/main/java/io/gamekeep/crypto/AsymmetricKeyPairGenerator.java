@@ -1,5 +1,7 @@
 package io.gamekeep.crypto;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.*;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -14,9 +17,12 @@ import java.security.spec.X509EncodedKeySpec;
 public class AsymmetricKeyPairGenerator {
     public static KeyPair generate() {
         try {
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+            Security.addProvider(new BouncyCastleProvider());
+            String curveName = "secp256r1";
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC", BouncyCastleProvider.PROVIDER_NAME);
+            kpg.initialize(new ECGenParameterSpec(curveName));
             return kpg.generateKeyPair();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             throw new RuntimeException(e);
         }
     }
@@ -41,7 +47,7 @@ public class AsymmetricKeyPairGenerator {
                                                     NoSuchAlgorithmException,
                                                     InvalidKeySpecException {
         PKCS8EncodedKeySpec prvKey = new PKCS8EncodedKeySpec(Files.readAllBytes(path));
-        return KeyFactory.getInstance("RSA").generatePrivate(prvKey);
+        return KeyFactory.getInstance("ECDSA").generatePrivate(prvKey);
     }
 
     public static PublicKey loadPublic(Path path) throws
@@ -49,7 +55,7 @@ public class AsymmetricKeyPairGenerator {
                                                   InvalidKeySpecException,
                                                   IOException {
         X509EncodedKeySpec pubKey = new X509EncodedKeySpec(Files.readAllBytes(path));
-        return KeyFactory.getInstance("RSA").generatePublic(pubKey);
+        return KeyFactory.getInstance("ECDSA").generatePublic(pubKey);
 
     }
 }

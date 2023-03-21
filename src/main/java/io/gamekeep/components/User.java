@@ -3,6 +3,7 @@ package io.gamekeep.components;
 import io.gamekeep.crypto.AsymmetricKeyPairGenerator;
 import io.gamekeep.crypto.Signer;
 
+import java.io.File;
 import java.io.Serializable;
 import java.security.KeyPair;
 import java.util.Objects;
@@ -14,6 +15,14 @@ public class User implements Serializable {
     public User(String userId) {
         this.userId = userId;
         loadKeys();
+    }
+
+    public static boolean keyFilesExists(String userId) {
+        String userFilePath = "keys/" + userId + "/";
+        File pubKeyFile = new File(userFilePath + "public.key");
+        File prvKeyFile = new File(userFilePath + "private.key");
+
+        return pubKeyFile.exists() && prvKeyFile.exists();
     }
 
     @Override
