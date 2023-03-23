@@ -16,14 +16,18 @@ public class Encryptor {
     static final byte[] e = new byte[]{8, 7, 6, 5, 4, 3, 2, 1};
     static final IESParameterSpec param = new IESParameterSpec(d, e, 256);
 
-    public static String decrypt(String ciphertext, PrivateKey receiverPrivateKey, PublicKey senderPublicKey) throws
-                                                                                                              InvalidKeyException,
-                                                                                                              IllegalBlockSizeException,
-                                                                                                              BadPaddingException,
-                                                                                                              NoSuchPaddingException,
-                                                                                                              NoSuchAlgorithmException,
-                                                                                                              NoSuchProviderException,
-                                                                                                              InvalidAlgorithmParameterException {
+    public static String decrypt(
+            String ciphertext,
+            PrivateKey receiverPrivateKey,
+            PublicKey senderPublicKey
+    ) throws
+      InvalidKeyException,
+      IllegalBlockSizeException,
+      BadPaddingException,
+      NoSuchPaddingException,
+      NoSuchAlgorithmException,
+      NoSuchProviderException,
+      InvalidAlgorithmParameterException {
         Cipher cipher = Cipher.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
 
         cipher.init(Cipher.DECRYPT_MODE, new IEKeySpec(receiverPrivateKey, senderPublicKey), param);
@@ -32,14 +36,18 @@ public class Encryptor {
         return new String(plainBytes);
     }
 
-    public static String encrypt(String plaintext, PrivateKey senderPrivateKey, PublicKey receiverPublicKey) throws
-                                                                                                             InvalidKeyException,
-                                                                                                             IllegalBlockSizeException,
-                                                                                                             BadPaddingException,
-                                                                                                             NoSuchPaddingException,
-                                                                                                             NoSuchAlgorithmException,
-                                                                                                             NoSuchProviderException,
-                                                                                                             InvalidAlgorithmParameterException {
+    public static String encrypt(
+            String plaintext,
+            PrivateKey senderPrivateKey,
+            PublicKey receiverPublicKey
+    ) throws
+      InvalidKeyException,
+      IllegalBlockSizeException,
+      BadPaddingException,
+      NoSuchPaddingException,
+      NoSuchAlgorithmException,
+      NoSuchProviderException,
+      InvalidAlgorithmParameterException {
         Cipher cipher = Cipher.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
         String ciphertext;
 

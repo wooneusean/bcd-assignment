@@ -28,6 +28,7 @@ public class DashboardFrame extends JFrame {
     private JTextArea txtCurrentBlockHash;
     private JTable tblTransactions;
     private JButton validateBlockchainButton;
+    private JLabel txtBlockNumber;
     private int currentBlockIndex = Blockchain.getBlockchain().size() - 1;
 
     public DashboardFrame(String title) {
@@ -139,11 +140,13 @@ public class DashboardFrame extends JFrame {
 
     private void refresh() {
         txtCurrentBlockHash.setText("0");
+        txtBlockNumber.setText("Genesis");
         btnNext.setEnabled(currentBlockIndex < Blockchain.getBlockchain().size() - 1);
         btnPrevious.setEnabled(currentBlockIndex > 0);
 
         if (currentBlock == null) return;
 
+        txtBlockNumber.setText(String.format("Block #%d", currentBlock.getBlockNumber()));
         txtMerkleRoot.setText(currentBlock.getMerkleRoot());
         txtTimestamp.setText(String.valueOf(currentBlock.getTimestamp()));
         txtCurrentBlockHash.setText(currentBlock.getBlockHash());

@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Block implements Serializable {
-    public static final int MAX_TRANSACTIONS = 2;
+    public static final int MAX_TRANSACTIONS = 10;
     private final List<Transaction> transactions = new ArrayList<>();
     private final String previousBlockHash;
     private final long timestamp;
+    private final long blockNumber;
 
     public Block(String previousBlockHash) {
+        this.blockNumber = Blockchain.getBlockchain().size() + 1;
         this.previousBlockHash = previousBlockHash;
         this.timestamp = System.currentTimeMillis();
     }
@@ -69,5 +71,9 @@ public class Block implements Serializable {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public long getBlockNumber() {
+        return blockNumber;
     }
 }
